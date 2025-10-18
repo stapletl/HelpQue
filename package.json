@@ -9,12 +9,10 @@
     "dev:ts": "tsc -b -w",
     "dev:convex": "npx convex dev",
     "build": "vite build && tsc --noEmit",
-    "start": "node .output/server/index.mjs",
     "format": "prettier --write .",
     "preview": "vite preview",
     "deploy": "wrangler deploy",
-    "cf-typegen": "wrangler types",
-    "postinstall": "npm run cf-typegen"
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.13.13",
