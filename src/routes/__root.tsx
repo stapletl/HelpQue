@@ -61,11 +61,11 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
     return (
-        <html>
+        <html className="h-full">
             <head>
                 <HeadContent />
             </head>
-            <body>
+            <body className="min-h-screen">
                 {children}
                 <Scripts />
             </body>
