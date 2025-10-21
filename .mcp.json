@@ -7,6 +7,10 @@
     "magicuidesign": {
       "command": "npx",
       "args": ["-y", "@magicuidesign/mcp@latest"]
+    },
+    "convex": {
+      "command": "npx",
+      "args": ["convex@latest", "mcp"]
     }
   }
 }
