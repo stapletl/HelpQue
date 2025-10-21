@@ -1,12 +1,16 @@
 {
-  "mcpServers": {
-    "shadcn": {
-      "command": "npx",
-      "args": ["shadcn@latest", "mcp"]
-    },
-    "magicuidesign": {
-      "command": "npx",
-      "args": ["-y", "@magicuidesign/mcp@latest"]
+    "mcpServers": {
+        "shadcn": {
+            "command": "npx",
+            "args": ["shadcn@latest", "mcp"]
+        },
+        "magicuidesign": {
+            "command": "npx",
+            "args": ["-y", "@magicuidesign/mcp@latest"]
+        },
+        "convex": {
+            "command": "npx",
+            "args": ["convex@latest", "mcp"]
+        }
     }
-  }
 }
