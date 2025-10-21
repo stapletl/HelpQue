@@ -4,15 +4,9 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import { api } from '../../convex/_generated/api'
 import { Button } from '~/components/ui/button'
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '~/components/ui/card'
 import { Badge } from '~/components/ui/badge'
-import { Heading, Text, TypographyLink } from '~/components/ui/typography'
+import { Text } from '~/components/ui/typography'
+import { AuroraText } from '~/components/ui/aurora-text'
 
 export const Route = createFileRoute('/')({
     component: Home,
@@ -28,113 +22,110 @@ function Home() {
     const addNumber = useMutation(api.myFunctions.addNumber)
 
     return (
-        <main className="p-8 flex flex-col gap-16">
-            <Heading variant="h1" className="text-center">
-                Convex + Tanstack Start
-            </Heading>
-            <div className="flex flex-col gap-8 max-w-lg mx-auto">
-                <Text>Welcome {viewer ?? 'Anonymous'}!</Text>
-                <Text>
-                    Click the button below and open this page in another window
-                    - this data is persisted in the Convex cloud database!
-                </Text>
-                <div>
+        <main className="min-h-screen flex flex-col items-center justify-center px-4 py-20 relative overflow-hidden">
+            {/* Hero Section */}
+            <div className="max-w-5xl mx-auto text-center space-y-8">
+                {/* Main Title with Aurora Effect */}
+                <div className="space-y-4">
+                    <h1 className="text-6xl md:text-8xl font-bold tracking-tight">
+                        <AuroraText
+                            colors={[
+                                '#FF0080',
+                                '#7928CA',
+                                '#0070F3',
+                                '#38bdf8',
+                            ]}
+                            speed={1.5}
+                        >
+                            HelpQue
+                        </AuroraText>
+                    </h1>
+                    <Text className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
+                        Real-time queue management powered by{' '}
+                        <span className="text-foreground font-semibold">
+                            Convex
+                        </span>{' '}
+                        and{' '}
+                        <span className="text-foreground font-semibold">
+                            TanStack
+                        </span>
+                    </Text>
+                </div>
+
+                {/* Welcome Message */}
+                <div className="flex items-center justify-center gap-2">
+                    <Badge variant="outline" className="px-4 py-1.5">
+                        Welcome {viewer ?? 'Anonymous'}
+                    </Badge>
+                </div>
+
+                {/* CTA Section */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                     <Button
+                        size="lg"
                         onClick={() => {
                             void addNumber({
                                 value: Math.floor(Math.random() * 10),
                             })
                         }}
+                        className="text-base px-8"
                     >
-                        Add a random number
+                        Try Live Sync
+                    </Button>
+                    <Button
+                        size="lg"
+                        variant="outline"
+                        asChild
+                        className="text-base px-8"
+                    >
+                        <Link to="/anotherPage">Explore More</Link>
                     </Button>
                 </div>
-                <Text>
-                    Numbers:{' '}
-                    {numbers.length === 0
-                        ? 'Click the button!'
-                        : numbers.join(', ')}
-                </Text>
-                <Text>
-                    Edit{' '}
-                    <Badge variant="secondary" className="font-mono">
-                        convex/myFunctions.ts
-                    </Badge>{' '}
-                    to change your backend
-                </Text>
-                <Text>
-                    Edit{' '}
-                    <Badge variant="secondary" className="font-mono">
-                        src/routes/index.tsx
-                    </Badge>{' '}
-                    to change your frontend
-                </Text>
-                <Text>
-                    Open{' '}
-                    <TypographyLink asChild>
-                        <Link to="/anotherPage">another page</Link>
-                    </TypographyLink>{' '}
-                    to send an action.
-                </Text>
-                <div className="flex flex-col">
-                    <Heading variant="h4">Useful resources:</Heading>
-                    <div className="flex gap-2">
-                        <div className="flex flex-col gap-2 w-1/2">
-                            <ResourceCard
-                                title="Convex docs"
-                                description="Read comprehensive documentation for all Convex features."
-                                href="https://docs.convex.dev/home"
-                            />
-                            <ResourceCard
-                                title="Stack articles"
-                                description="Learn about best practices, use cases, and more from a growing
-            collection of articles, videos, and walkthroughs."
-                                href="https://www.typescriptlang.org/docs/handbook/2/basic-types.html"
-                            />
+
+                {/* Live Data Display */}
+                <div className="pt-12 space-y-4">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/50 rounded-full">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                        <Text
+                            variant="small"
+                            className="text-accent-foreground"
+                        >
+                            Live Data Stream
+                        </Text>
+                    </div>
+                    <div className="bg-card border border-border rounded-xl p-6 max-w-md mx-auto">
+                        <div className="text-4xl font-mono font-bold text-primary">
+                            {numbers.length === 0
+                                ? '—'
+                                : numbers.slice(-5).reverse().join(' · ')}
                         </div>
-                        <div className="flex flex-col gap-2 w-1/2">
-                            <ResourceCard
-                                title="Templates"
-                                description="Browse our collection of templates to get started quickly."
-                                href="https://www.convex.dev/templates"
-                            />
-                            <ResourceCard
-                                title="Discord"
-                                description="Join our developer community to ask questions, trade tips & tricks,
-            and show off your projects."
-                                href="https://www.convex.dev/community"
-                            />
-                        </div>
+                        <Text variant="muted" className="mt-2">
+                            {numbers.length === 0
+                                ? 'Click above to generate data'
+                                : `${numbers.length} synchronized ${numbers.length === 1 ? 'entry' : 'entries'}`}
+                        </Text>
                     </div>
                 </div>
-            </div>
-        </main>
-    )
-}
 
-function ResourceCard({
-    title,
-    description,
-    href,
-}: {
-    title: string
-    description: string
-    href: string
-}) {
-    return (
-        <Card className="h-28 overflow-auto py-4">
-            <CardHeader>
-                <CardTitle>
-                    <TypographyLink href={href} className="text-sm">
-                        {title}
-                    </TypographyLink>
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-                <CardDescription className="text-xs">
-                    {description}
-                </CardDescription>
-            </CardContent>
-        </Card>
+                {/* Feature Tags */}
+                <div className="flex flex-wrap items-center justify-center gap-3 pt-8">
+                    <Badge variant="secondary" className="font-mono text-xs">
+                        Real-time Sync
+                    </Badge>
+                    <Badge variant="secondary" className="font-mono text-xs">
+                        Serverless Backend
+                    </Badge>
+                    <Badge variant="secondary" className="font-mono text-xs">
+                        Type-Safe
+                    </Badge>
+                    <Badge variant="secondary" className="font-mono text-xs">
+                        Modern Stack
+                    </Badge>
+                </div>
+            </div>
+
+            {/* Subtle Background Gradient */}
+            <div className="absolute inset-0 -z-10 bg-linear-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+        </main>
     )
 }
