@@ -5,8 +5,8 @@ import {
     createRootRouteWithContext,
 } from '@tanstack/react-router'
 import * as React from 'react'
+import { ThemeProvider } from 'next-themes'
 import type { QueryClient } from '@tanstack/react-query'
-import { ThemeProvider } from '~/components/providers/theme-provider'
 import appCss from '~/styles/app.css?url'
 import { AnimatedThemeToggler } from '~/components/ui/animated-theme-toggler'
 
@@ -56,28 +56,28 @@ export const Route = createRootRouteWithContext<{
 function RootComponent() {
     return (
         <RootDocument>
-            <ThemeProvider
-                attribute="class"
-                storageKey="helpque-theme"
-                enableSystem={true}
-            >
-                <Outlet />
-                <div className="fixed bottom-6 right-6 z-50">
-                    <AnimatedThemeToggler />
-                </div>
-            </ThemeProvider>
+            <Outlet />
+            <div className="fixed bottom-6 right-6 z-50">
+                <AnimatedThemeToggler />
+            </div>
         </RootDocument>
     )
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
     return (
-        <html className="h-full">
+        <html suppressHydrationWarning={true} className="h-full">
             <head>
                 <HeadContent />
             </head>
             <body className="min-h-screen">
-                {children}
+                <ThemeProvider
+                    attribute="class"
+                    storageKey="helpque-theme"
+                    enableSystem={true}
+                >
+                    {children}
+                </ThemeProvider>
                 <Scripts />
             </body>
         </html>

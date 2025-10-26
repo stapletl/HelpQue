@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useTheme } from '../providers/theme-provider'
+import { useTheme } from 'next-themes'
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { cn } from '~/lib/utils'
