@@ -36,7 +36,10 @@ function TeacherView() {
             <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
                 <div className="container mx-auto px-4 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link to="/" className="hover:opacity-80 transition-opacity">
+                        <Link
+                            to="/"
+                            className="hover:opacity-80 transition-opacity"
+                        >
                             <h1 className="text-2xl font-bold">HelpQue</h1>
                         </Link>
                         <Badge variant="outline">Teacher View</Badge>
@@ -206,9 +209,7 @@ function QueueCard({
     return (
         <Card
             className={`cursor-pointer transition-all ${
-                isSelected
-                    ? 'ring-2 ring-primary shadow-lg'
-                    : 'hover:shadow-md'
+                isSelected ? 'ring-2 ring-primary shadow-lg' : 'hover:shadow-md'
             }`}
             onClick={onSelect}
         >
@@ -301,7 +302,9 @@ function QueueDetails({ queueId }: { queueId: Id<'queues'> }) {
     }
 
     const waitingEntries = entries.filter((e) => e.status === 'waiting')
-    const beingHelpedEntries = entries.filter((e) => e.status === 'being_helped')
+    const beingHelpedEntries = entries.filter(
+        (e) => e.status === 'being_helped',
+    )
 
     return (
         <div className="space-y-6">
@@ -319,9 +322,7 @@ function QueueDetails({ queueId }: { queueId: Id<'queues'> }) {
                                 </CardDescription>
                             )}
                         </div>
-                        <Badge
-                            variant={queue.isActive ? 'default' : 'outline'}
-                        >
+                        <Badge variant={queue.isActive ? 'default' : 'outline'}>
                             {queue.isActive ? 'Active' : 'Inactive'}
                         </Badge>
                     </div>

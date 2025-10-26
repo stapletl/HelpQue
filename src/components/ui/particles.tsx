@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useTheme } from 'tanstack-theme-kit'
+import { useTheme } from '../providers/theme-provider'
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { cn } from '~/lib/utils'
@@ -95,8 +95,9 @@ export const Particles: React.FC<ParticlesProps> = ({
     const rafID = useRef<number | null>(null)
     const resizeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-    const { theme } = useTheme()
-    const isDark = theme === 'dark'
+    const { systemTheme, theme } = useTheme()
+    const resolvedTheme = theme === 'system' ? systemTheme : theme
+    const isDark = resolvedTheme === 'dark'
     const adjustedColor = isDark ? color : '#000000'
 
     useEffect(() => {

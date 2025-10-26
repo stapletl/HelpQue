@@ -2,7 +2,7 @@ import { useCallback, useRef } from 'react'
 import { Moon, Sun } from 'lucide-react'
 import { flushSync } from 'react-dom'
 
-import { useTheme } from 'tanstack-theme-kit'
+import { useTheme } from '../providers/theme-provider'
 import { Button } from './button'
 import { cn } from '~/lib/utils'
 
@@ -16,8 +16,9 @@ export const AnimatedThemeToggler = ({
     duration = 400,
     ...props
 }: AnimatedThemeTogglerProps) => {
-    const { theme, setTheme } = useTheme()
-    const isDark = theme === 'dark'
+    const { systemTheme, theme, setTheme } = useTheme()
+    const resolvedTheme = theme === 'system' ? systemTheme : theme
+    const isDark = resolvedTheme === 'dark'
     const buttonRef = useRef<HTMLButtonElement>(null)
 
     const toggleTheme = useCallback(async () => {
@@ -25,6 +26,7 @@ export const AnimatedThemeToggler = ({
 
         await document.startViewTransition(() => {
             flushSync(() => {
+                // Toggle between light and dark only (ignoring system)
                 const newTheme = isDark ? 'light' : 'dark'
                 setTheme(newTheme)
             })
@@ -52,7 +54,7 @@ export const AnimatedThemeToggler = ({
                 pseudoElement: '::view-transition-new(root)',
             },
         )
-    }, [isDark, duration])
+    }, [isDark, setTheme, duration])
 
     return (
         <Button

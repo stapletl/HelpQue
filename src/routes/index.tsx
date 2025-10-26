@@ -19,7 +19,7 @@ function Home() {
     return (
         <main className="min-h-screen flex flex-col items-center justify-center px-4 py-20 relative overflow-hidden">
             <div className="absolute h-full w-full overflow-hidden rounded-xl border -z-10">
-                <Particles className="h-full" staticity={25} ease={25} />
+                <Particles className="h-full" />
             </div>
 
             {/* Hero Section */}

@@ -107,7 +107,9 @@ export const getQueue = query({
 
         if (helpedEntries.length > 0) {
             const totalWaitTime = helpedEntries.reduce((sum, entry) => {
-                return sum + ((entry.helpedAt ?? entry.joinedAt) - entry.joinedAt)
+                return (
+                    sum + ((entry.helpedAt ?? entry.joinedAt) - entry.joinedAt)
+                )
             }, 0)
             averageWaitTime = totalWaitTime / helpedEntries.length
         }
@@ -365,7 +367,8 @@ export const updateQueue = mutation({
         }> = {}
 
         if (args.name !== undefined) updates.name = args.name
-        if (args.description !== undefined) updates.description = args.description
+        if (args.description !== undefined)
+            updates.description = args.description
         if (args.isActive !== undefined) updates.isActive = args.isActive
 
         await ctx.db.patch(args.queueId, updates)
@@ -417,19 +420,24 @@ export const joinQueue = mutation({
         }
 
         // Calculate position (count of waiting entries)
-        const waitingEntries = existingEntries.filter((e) => e.status === 'waiting')
+        const waitingEntries = existingEntries.filter(
+            (e) => e.status === 'waiting',
+        )
         const position = waitingEntries.length
 
         // Insert entry
-        const entryId: Id<'queueEntries'> = await ctx.db.insert('queueEntries', {
-            queueId: args.queueId,
-            userId: args.userId,
-            userName: args.userName,
-            status: 'waiting',
-            position,
-            joinedAt: Date.now(),
-            notes: args.notes,
-        })
+        const entryId: Id<'queueEntries'> = await ctx.db.insert(
+            'queueEntries',
+            {
+                queueId: args.queueId,
+                userId: args.userId,
+                userName: args.userName,
+                status: 'waiting',
+                position,
+                joinedAt: Date.now(),
+                notes: args.notes,
+            },
+        )
 
         return {
             entryId,
@@ -459,13 +467,9 @@ export const leaveQueue = mutation({
         })
 
         // Schedule position recalculation
-        await ctx.scheduler.runAfter(
-            0,
-            internal.queues.recalculatePositions,
-            {
-                queueId: entry.queueId,
-            },
-        )
+        await ctx.scheduler.runAfter(0, internal.queues.recalculatePositions, {
+            queueId: entry.queueId,
+        })
 
         return null
     },
@@ -527,13 +531,9 @@ export const markAsHelped = mutation({
         })
 
         // Schedule position recalculation
-        await ctx.scheduler.runAfter(
-            0,
-            internal.queues.recalculatePositions,
-            {
-                queueId: entry.queueId,
-            },
-        )
+        await ctx.scheduler.runAfter(0, internal.queues.recalculatePositions, {
+            queueId: entry.queueId,
+        })
 
         return null
     },
@@ -560,13 +560,9 @@ export const removeEntry = mutation({
         })
 
         // Schedule position recalculation
-        await ctx.scheduler.runAfter(
-            0,
-            internal.queues.recalculatePositions,
-            {
-                queueId: entry.queueId,
-            },
-        )
+        await ctx.scheduler.runAfter(0, internal.queues.recalculatePositions, {
+            queueId: entry.queueId,
+        })
 
         return null
     },
