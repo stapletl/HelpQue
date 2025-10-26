@@ -95,8 +95,7 @@ export const Particles: React.FC<ParticlesProps> = ({
     const rafID = useRef<number | null>(null)
     const resizeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-    const { systemTheme, theme } = useTheme()
-    const resolvedTheme = theme === 'system' ? systemTheme : theme
+    const { resolvedTheme } = useTheme()
     const isDark = resolvedTheme === 'dark'
     const adjustedColor = isDark ? color : '#000000'
 

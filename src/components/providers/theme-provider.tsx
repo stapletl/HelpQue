@@ -27,10 +27,10 @@ export type UseThemeProps = {
     setTheme: Dispatch<SetStateAction<string>>
     /** Active theme name */
     theme?: string | undefined
-    /** If enableSystem is true, returns the System theme preference ("dark" or "light"), regardless what the active theme is */
-    systemTheme?: 'dark' | 'light' | undefined
     /** If `enableSystem` is true and the active theme is "system", this returns whether the system preference resolved to "dark" or "light". Otherwise, identical to `theme` */
     resolvedTheme?: string | undefined
+    /** If enableSystem is true, returns the System theme preference ("dark" or "light"), regardless what the active theme is */
+    systemTheme?: 'dark' | 'light' | undefined
 }
 
 export type Attribute = `data-${string}` | 'class'
@@ -98,6 +98,9 @@ const Theme = ({
 }: ThemeProviderProps) => {
     const [theme, setThemeState] = useState(() =>
         getTheme(storageKey, defaultTheme),
+    )
+    const [resolvedTheme, setResolvedTheme] = useState(() =>
+        theme === 'system' ? getSystemTheme() : theme,
     )
 
     const applyClassAttribute = useCallback(
@@ -205,7 +208,10 @@ const Theme = ({
     )
 
     const handleMediaQuery = useCallback(
-        (_event: MediaQueryListEvent | MediaQueryList) => {
+        (e: MediaQueryListEvent | MediaQueryList) => {
+            const resolved = getSystemTheme(e)
+            setResolvedTheme(resolved)
+
             if (theme === 'system' && enableSystem && !forcedTheme) {
                 applyTheme('system')
             }
@@ -258,10 +264,14 @@ const Theme = ({
             theme,
             setTheme,
             forcedTheme,
+            resolvedTheme: theme === 'system' ? resolvedTheme : theme,
             themes: enableSystem ? [...themes, 'system'] : themes,
-            systemTheme: enableSystem ? getSystemTheme() : undefined,
+            systemTheme: (enableSystem ? resolvedTheme : undefined) as
+                | 'light'
+                | 'dark'
+                | undefined,
         }),
-        [theme, forcedTheme, enableSystem, themes, setTheme],
+        [theme, forcedTheme, enableSystem, themes, setTheme, resolvedTheme],
     )
 
     return (
