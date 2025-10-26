@@ -8,7 +8,7 @@
  * @module
  */
 
-import type * as myFunctions from "../myFunctions.js";
+import type * as queues from "../queues.js";
 
 import type {
   ApiFromModules,
@@ -25,7 +25,7 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  myFunctions: typeof myFunctions;
+  queues: typeof queues;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

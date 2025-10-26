@@ -1,7 +1,10 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { useSuspenseQuery, useMutation } from '@tanstack/react-query'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation } from 'convex/react'
 import { convexQuery } from '@convex-dev/react-query'
+import { useEffect, useState } from 'react'
 import { api } from '../../convex/_generated/api'
+import type { Id } from '../../convex/_generated/dataModel'
 import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { Text } from '~/components/ui/typography'
@@ -12,12 +15,14 @@ import {
     CardHeader,
     CardTitle,
 } from '~/components/ui/card'
-import { useState, useEffect } from 'react'
-import type { Id } from '../../convex/_generated/dataModel'
 
 export const Route = createFileRoute('/student')({
-    component: StudentView,
+    component: Placeholder,
 })
+
+function Placeholder() {
+    return <div>Coming Soon!</div>
+}
 
 function StudentView() {
     const [studentId, setStudentId] = useState<string>('')
@@ -65,7 +70,10 @@ function StudentView() {
             <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
                 <div className="container mx-auto px-4 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link to="/" className="hover:opacity-80 transition-opacity">
+                        <Link
+                            to="/"
+                            className="hover:opacity-80 transition-opacity"
+                        >
                             <h1 className="text-2xl font-bold">HelpQue</h1>
                         </Link>
                         <Badge variant="outline">Student View</Badge>
@@ -167,7 +175,9 @@ function StudentSetup({ onSave }: { onSave: (name: string) => void }) {
         <div className="min-h-screen flex items-center justify-center px-4 bg-background">
             <Card className="max-w-md w-full">
                 <CardHeader>
-                    <CardTitle className="text-2xl">Welcome to HelpQue</CardTitle>
+                    <CardTitle className="text-2xl">
+                        Welcome to HelpQue
+                    </CardTitle>
                     <CardDescription>
                         Enter your name to get started
                     </CardDescription>
@@ -226,7 +236,7 @@ function MyQueueCard({
 
     const handleLeave = async () => {
         if (confirm('Are you sure you want to leave this queue?')) {
-            await leaveQueue.mutateAsync({ entryId: entry._id })
+            await leaveQueue({ entryId: entry._id })
         }
     }
 
@@ -324,7 +334,7 @@ function AvailableQueueCard({
     const joinQueue = useMutation(api.queues.joinQueue)
 
     const handleJoin = async () => {
-        await joinQueue.mutateAsync({
+        await joinQueue({
             queueId: queue._id,
             userId: studentId,
             userName: studentName,

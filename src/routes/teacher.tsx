@@ -1,7 +1,10 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { useSuspenseQuery, useMutation } from '@tanstack/react-query'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation } from 'convex/react'
 import { convexQuery } from '@convex-dev/react-query'
+import { useState } from 'react'
 import { api } from '../../convex/_generated/api'
+import type { Id } from '../../convex/_generated/dataModel'
 import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { Text } from '~/components/ui/typography'
@@ -12,8 +15,6 @@ import {
     CardHeader,
     CardTitle,
 } from '~/components/ui/card'
-import { useState } from 'react'
-import type { Id } from '../../convex/_generated/dataModel'
 
 export const Route = createFileRoute('/teacher')({
     component: TeacherView,
@@ -122,7 +123,7 @@ function CreateQueueForm({ onSuccess }: { onSuccess: () => void }) {
         e.preventDefault()
         if (!name.trim()) return
 
-        await createQueue.mutateAsync({
+        await createQueue({
             name: name.trim(),
             description: description.trim() || undefined,
             createdBy: 'Teacher',
@@ -196,7 +197,7 @@ function QueueCard({
 
     const toggleActive = async (e: React.MouseEvent) => {
         e.stopPropagation()
-        await updateQueue.mutateAsync({
+        await updateQueue({
             queueId: queue._id,
             isActive: !queue.isActive,
         })
@@ -279,16 +280,16 @@ function QueueDetails({ queueId }: { queueId: Id<'queues'> }) {
     }
 
     const handleCallNext = async () => {
-        await callNext.mutateAsync({ queueId })
+        await callNext({ queueId })
     }
 
     const handleMarkHelped = async (entryId: Id<'queueEntries'>) => {
-        await markAsHelped.mutateAsync({ entryId })
+        await markAsHelped({ entryId })
     }
 
     const handleRemoveEntry = async (entryId: Id<'queueEntries'>) => {
         if (confirm('Are you sure you want to remove this student?')) {
-            await removeEntry.mutateAsync({ entryId })
+            await removeEntry({ entryId })
         }
     }
 

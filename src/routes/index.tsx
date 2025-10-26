@@ -1,6 +1,5 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
-import { Badge } from '~/components/ui/badge'
 import { Text } from '~/components/ui/typography'
 import { AuroraText } from '~/components/ui/aurora-text'
 import {
@@ -10,6 +9,7 @@ import {
     CardHeader,
     CardTitle,
 } from '~/components/ui/card'
+import { Particles } from '~/components/ui/particles'
 
 export const Route = createFileRoute('/')({
     component: Home,
@@ -18,6 +18,10 @@ export const Route = createFileRoute('/')({
 function Home() {
     return (
         <main className="min-h-screen flex flex-col items-center justify-center px-4 py-20 relative overflow-hidden">
+            <div className="absolute h-full w-full overflow-hidden rounded-xl border -z-10">
+                <Particles className="h-full" staticity={25} ease={25} />
+            </div>
+
             {/* Hero Section */}
             <div className="max-w-5xl mx-auto text-center space-y-12">
                 {/* Main Title with Aurora Effect */}
@@ -38,19 +42,6 @@ function Home() {
                     <Text className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
                         Digital queue management for classrooms and help desks
                     </Text>
-                </div>
-
-                {/* Live Indicator */}
-                <div className="flex items-center justify-center gap-2">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/50 rounded-full">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                        <Text
-                            variant="small"
-                            className="text-accent-foreground"
-                        >
-                            Real-time Updates
-                        </Text>
-                    </div>
                 </div>
 
                 {/* Role Selection Cards */}
@@ -160,22 +151,6 @@ function Home() {
                             </Button>
                         </CardContent>
                     </Card>
-                </div>
-
-                {/* Feature Tags */}
-                <div className="flex flex-wrap items-center justify-center gap-3 pt-8">
-                    <Badge variant="secondary" className="font-mono text-xs">
-                        Real-time Sync
-                    </Badge>
-                    <Badge variant="secondary" className="font-mono text-xs">
-                        Serverless Backend
-                    </Badge>
-                    <Badge variant="secondary" className="font-mono text-xs">
-                        Queue Management
-                    </Badge>
-                    <Badge variant="secondary" className="font-mono text-xs">
-                        Live Updates
-                    </Badge>
                 </div>
             </div>
 
