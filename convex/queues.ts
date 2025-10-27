@@ -1,4 +1,5 @@
 import { v } from 'convex/values'
+import { getAuthUserId } from '@convex-dev/auth/server'
 import { internalMutation, mutation, query } from './_generated/server'
 import { internal } from './_generated/api'
 import type { Id } from './_generated/dataModel'
@@ -22,7 +23,8 @@ export const listQueues = query({
             name: v.string(),
             description: v.optional(v.string()),
             isActive: v.boolean(),
-            createdBy: v.optional(v.string()),
+            createdByUserId: v.id('users'),
+            createdByUserName: v.optional(v.string()),
             createdAt: v.number(),
             waitingCount: v.number(),
         }),
@@ -75,7 +77,8 @@ export const getQueue = query({
             name: v.string(),
             description: v.optional(v.string()),
             isActive: v.boolean(),
-            createdBy: v.optional(v.string()),
+            createdByUserId: v.id('users'),
+            createdByUserName: v.optional(v.string()),
             createdAt: v.number(),
             waitingCount: v.number(),
             totalCount: v.number(),
@@ -281,7 +284,8 @@ export const getUserQueues = query({
                 name: v.string(),
                 description: v.optional(v.string()),
                 isActive: v.boolean(),
-                createdBy: v.optional(v.string()),
+                createdByUserId: v.id('users'),
+                createdByUserName: v.optional(v.string()),
                 createdAt: v.number(),
             }),
         }),
@@ -326,15 +330,22 @@ export const createQueue = mutation({
     args: {
         name: v.string(),
         description: v.optional(v.string()),
-        createdBy: v.optional(v.string()),
     },
     returns: v.id('queues'),
     handler: async (ctx, args) => {
+        const userId = await getAuthUserId(ctx)
+        if (!userId) {
+            throw new Error('Unauthorized')
+        }
+
+        const userName = await ctx.db.get(userId).then((user) => user?.name)
+
         const queueId: Id<'queues'> = await ctx.db.insert('queues', {
             name: args.name,
             description: args.description,
             isActive: true,
-            createdBy: args.createdBy,
+            createdByUserId: userId,
+            createdByUserName: userName,
             createdAt: Date.now(),
         })
 

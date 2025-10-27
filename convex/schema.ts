@@ -1,14 +1,20 @@
+import { authTables } from '@convex-dev/auth/server'
 import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 
 export default defineSchema({
+    ...authTables,
+
     queues: defineTable({
         name: v.string(),
         description: v.optional(v.string()),
         isActive: v.boolean(),
-        createdBy: v.optional(v.string()),
+        createdByUserId: v.id('users'),
+        createdByUserName: v.optional(v.string()),
         createdAt: v.number(),
-    }).index('by_active', ['isActive']),
+    })
+        .index('by_active', ['isActive'])
+        .index('by_creator', ['createdByUserId']),
 
     queueEntries: defineTable({
         queueId: v.id('queues'),
