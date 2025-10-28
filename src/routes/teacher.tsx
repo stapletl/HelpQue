@@ -20,8 +20,9 @@ import {
     CardHeader,
     CardTitle,
 } from '~/components/ui/card'
-import { SignIn } from '~/auth/SignIn'
-import { SignOut } from '~/auth/SignOut'
+import { SignInPage } from '~/auth/SignInPage'
+import { SignOutButton } from '~/auth/SignOutButton'
+import { AuthLoadingSpinner } from '~/auth/AuthLoadingSpinner'
 
 export const Route = createFileRoute('/teacher')({
     component: TeacherPage,
@@ -30,9 +31,9 @@ export const Route = createFileRoute('/teacher')({
 function TeacherPage() {
     return (
         <>
-            <AuthLoading>{null}</AuthLoading>
+            <AuthLoading>{<AuthLoadingSpinner />}</AuthLoading>
             <Unauthenticated>
-                <SignIn redirectTo="/teacher" />
+                <SignInPage redirectTo="/teacher" />
             </Unauthenticated>
             <Authenticated>
                 <TeacherView />
@@ -72,7 +73,7 @@ function TeacherView() {
                         >
                             {showCreateQueue ? 'Cancel' : '+ New Queue'}
                         </Button>
-                        <SignOut />
+                        <SignOutButton />
                     </div>
                 </div>
             </header>

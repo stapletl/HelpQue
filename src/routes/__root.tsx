@@ -6,13 +6,9 @@ import {
 } from '@tanstack/react-router'
 import * as React from 'react'
 import { ThemeProvider } from 'next-themes'
-import { ConvexAuthProvider } from '@convex-dev/auth/react'
-import { ConvexReactClient } from 'convex/react'
 import type { QueryClient } from '@tanstack/react-query'
 import appCss from '~/styles/app.css?url'
 import { AnimatedThemeToggler } from '~/components/ui/animated-theme-toggler'
-
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string)
 
 export const Route = createRootRouteWithContext<{
     queryClient: QueryClient
@@ -60,9 +56,7 @@ export const Route = createRootRouteWithContext<{
 function RootComponent() {
     return (
         <RootDocument>
-            <ConvexAuthProvider client={convex}>
-                <Outlet />
-            </ConvexAuthProvider>
+            <Outlet />
             <div className="fixed bottom-6 right-6 z-50">
                 <AnimatedThemeToggler />
             </div>

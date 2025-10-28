@@ -147,7 +147,7 @@ export const listQueueEntries = query({
             _id: v.id('queueEntries'),
             _creationTime: v.number(),
             queueId: v.id('queues'),
-            userId: v.string(),
+            userId: v.id('users'),
             userName: v.string(),
             status: v.union(
                 v.literal('waiting'),
@@ -193,19 +193,18 @@ export const listQueueEntries = query({
 })
 
 /**
- * Get a specific user's current position and status in a queue
+ * Get the current user's position and status in a queue
  */
 export const getUserPosition = query({
     args: {
         queueId: v.id('queues'),
-        userId: v.string(),
     },
     returns: v.union(
         v.object({
             _id: v.id('queueEntries'),
             _creationTime: v.number(),
             queueId: v.id('queues'),
-            userId: v.string(),
+            userId: v.id('users'),
             userName: v.string(),
             status: v.union(
                 v.literal('waiting'),
@@ -222,6 +221,11 @@ export const getUserPosition = query({
         v.null(),
     ),
     handler: async (ctx, args) => {
+        const userId = await getAuthUserId(ctx)
+        if (!userId) {
+            return null
+        }
+
         // Find user's entry in this queue with active status
         const userEntries = await ctx.db
             .query('queueEntries')
@@ -230,7 +234,7 @@ export const getUserPosition = query({
 
         const userEntry = userEntries.find(
             (e) =>
-                e.userId === args.userId &&
+                e.userId === userId &&
                 (e.status === 'waiting' || e.status === 'being_helped'),
         )
 
@@ -252,20 +256,18 @@ export const getUserPosition = query({
 })
 
 /**
- * Get all queues a user is currently in
+ * Get all queues the current user is currently in
  * Only returns entries with status "waiting" or "being_helped"
  */
 export const getUserQueues = query({
-    args: {
-        userId: v.string(),
-    },
+    args: {},
     returns: v.array(
         v.object({
             entry: v.object({
                 _id: v.id('queueEntries'),
                 _creationTime: v.number(),
                 queueId: v.id('queues'),
-                userId: v.string(),
+                userId: v.id('users'),
                 userName: v.string(),
                 status: v.union(
                     v.literal('waiting'),
@@ -290,10 +292,15 @@ export const getUserQueues = query({
             }),
         }),
     ),
-    handler: async (ctx, args) => {
+    handler: async (ctx) => {
+        const userId = await getAuthUserId(ctx)
+        if (!userId) {
+            return []
+        }
+
         const entries = await ctx.db
             .query('queueEntries')
-            .withIndex('by_user', (q) => q.eq('userId', args.userId))
+            .withIndex('by_user', (q) => q.eq('userId', userId))
             .collect()
 
         // Filter for active entries only
@@ -389,13 +396,11 @@ export const updateQueue = mutation({
 })
 
 /**
- * Add a user to a queue
+ * Add the current user to a queue
  */
 export const joinQueue = mutation({
     args: {
         queueId: v.id('queues'),
-        userId: v.string(),
-        userName: v.string(),
         notes: v.optional(v.string()),
     },
     returns: v.object({
@@ -403,6 +408,15 @@ export const joinQueue = mutation({
         position: v.number(),
     }),
     handler: async (ctx, args) => {
+        const userId = await getAuthUserId(ctx)
+        if (!userId) {
+            throw new Error('You must be signed in to join a queue')
+        }
+
+        // Get user's name from the users table
+        const user = await ctx.db.get(userId)
+        const userName = user?.name ?? 'Anonymous'
+
         // Verify queue exists and is active
         const queue = await ctx.db.get(args.queueId)
 
@@ -422,7 +436,7 @@ export const joinQueue = mutation({
 
         const userInQueue = existingEntries.find(
             (e) =>
-                e.userId === args.userId &&
+                e.userId === userId &&
                 (e.status === 'waiting' || e.status === 'being_helped'),
         )
 
@@ -441,8 +455,8 @@ export const joinQueue = mutation({
             'queueEntries',
             {
                 queueId: args.queueId,
-                userId: args.userId,
-                userName: args.userName,
+                userId,
+                userName,
                 status: 'waiting',
                 position,
                 joinedAt: Date.now(),

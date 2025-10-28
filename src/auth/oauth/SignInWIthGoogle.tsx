@@ -9,15 +9,16 @@ type SignInWithGoogleProps = {
 export const SignInWithGoogle: React.FC<SignInWithGoogleProps> = ({
     redirectTo,
 }) => {
+    const handleClick = async () =>
+        await signIn('google', redirectTo ? { redirectTo } : undefined)
+
     const { signIn } = useAuthActions()
     return (
         <RainbowButton
             className="flex w-full justify-center"
             variant="default"
             type="button"
-            onClick={() =>
-                void signIn('google', redirectTo ? { redirectTo } : undefined)
-            }
+            onClick={handleClick}
         >
             <GoogleLogo className="mr-2 h-4 w-4" /> Google
         </RainbowButton>

@@ -2,7 +2,8 @@ import { Link, createRouter } from '@tanstack/react-router'
 import { QueryClient } from '@tanstack/react-query'
 import { routerWithQueryClient } from '@tanstack/react-router-with-query'
 import { ConvexQueryClient } from '@convex-dev/react-query'
-import { ConvexProvider } from 'convex/react'
+import { ConvexAuthProvider } from '@convex-dev/auth/react'
+
 import { AlertTriangle } from 'lucide-react'
 import { routeTree } from './routeTree.gen'
 import { Heading } from './components/ui/typography'
@@ -36,9 +37,9 @@ export function getRouter() {
             defaultErrorComponent: (err) => <p>{err.error.stack}</p>,
             defaultNotFoundComponent,
             Wrap: ({ children }) => (
-                <ConvexProvider client={convexQueryClient.convexClient}>
+                <ConvexAuthProvider client={convexQueryClient.convexClient}>
                     {children}
-                </ConvexProvider>
+                </ConvexAuthProvider>
             ),
         }),
         queryClient,

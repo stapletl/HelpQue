@@ -7,7 +7,7 @@ type SignInProps = {
     redirectTo?: string
 }
 
-export const SignIn: React.FC<SignInProps> = ({ redirectTo }) => {
+export const SignInPage: React.FC<SignInProps> = ({ redirectTo }) => {
     return (
         <div className="w-full h-screen flex items-center justify-center">
             <Card className="w-96 gap-6 py-6">

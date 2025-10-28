@@ -18,7 +18,7 @@ export default defineSchema({
 
     queueEntries: defineTable({
         queueId: v.id('queues'),
-        userId: v.string(),
+        userId: v.id('users'),
         userName: v.string(),
         status: v.union(
             v.literal('waiting'),
