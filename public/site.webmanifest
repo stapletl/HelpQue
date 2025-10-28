@@ -1,6 +1,7 @@
 {
-  "name": "",
-  "short_name": "",
+  "name": "HelpQue - Digital Queue Management",
+  "short_name": "HelpQue",
+  "description": "Digital queue management application for help and assistance",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
