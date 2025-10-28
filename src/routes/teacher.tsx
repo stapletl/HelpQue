@@ -1,8 +1,13 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { useMutation } from 'convex/react'
 import { convexQuery } from '@convex-dev/react-query'
 import { useState } from 'react'
+import {
+    AuthLoading,
+    Authenticated,
+    Unauthenticated,
+    useMutation,
+} from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import type { Id } from '../../convex/_generated/dataModel'
 import { Button } from '~/components/ui/button'
@@ -15,10 +20,27 @@ import {
     CardHeader,
     CardTitle,
 } from '~/components/ui/card'
+import { SignInPage } from '~/auth/SignInPage'
+import { SignOutButton } from '~/auth/SignOutButton'
+import { AuthLoadingSpinner } from '~/auth/AuthLoadingSpinner'
 
 export const Route = createFileRoute('/teacher')({
-    component: TeacherView,
+    component: TeacherPage,
 })
+
+function TeacherPage() {
+    return (
+        <>
+            <AuthLoading>{<AuthLoadingSpinner />}</AuthLoading>
+            <Unauthenticated>
+                <SignInPage redirectTo="/teacher" />
+            </Unauthenticated>
+            <Authenticated>
+                <TeacherView />
+            </Authenticated>
+        </>
+    )
+}
 
 function TeacherView() {
     const [selectedQueueId, setSelectedQueueId] = useState<Id<'queues'> | null>(
@@ -42,14 +64,17 @@ function TeacherView() {
                         >
                             <h1 className="text-2xl font-bold">HelpQue</h1>
                         </Link>
-                        <Badge variant="outline">Teacher View</Badge>
                     </div>
-                    <Button
-                        onClick={() => setShowCreateQueue(!showCreateQueue)}
-                        size="sm"
-                    >
-                        {showCreateQueue ? 'Cancel' : '+ New Queue'}
-                    </Button>
+                    <div className="flex items-center gap-4">
+                        <Button
+                            variant="outline"
+                            type="button"
+                            onClick={() => setShowCreateQueue(!showCreateQueue)}
+                        >
+                            {showCreateQueue ? 'Cancel' : '+ New Queue'}
+                        </Button>
+                        <SignOutButton />
+                    </div>
                 </div>
             </header>
 
@@ -129,7 +154,6 @@ function CreateQueueForm({ onSuccess }: { onSuccess: () => void }) {
         await createQueue({
             name: name.trim(),
             description: description.trim() || undefined,
-            createdBy: 'Teacher',
         })
 
         setName('')
