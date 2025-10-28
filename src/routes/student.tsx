@@ -113,7 +113,7 @@ function StudentView() {
                             </Link>
                             <Badge variant="outline">Student View</Badge>
                         </div>
-                        <SignOutButton />
+                        <SignOutButton redirectTo="/" />
                     </div>
                 </header>
 

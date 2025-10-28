@@ -18,7 +18,7 @@ export const Route = createFileRoute('/')({
 function Home() {
     return (
         <main className="min-h-screen flex flex-col items-center justify-center px-4 py-20 relative overflow-hidden">
-            <div className="absolute h-full w-full overflow-hidden rounded-xl border -z-10">
+            <div className="absolute h-full w-full overflow-hidden -z-10">
                 <Particles className="h-full" />
             </div>
 
