@@ -1,7 +1,13 @@
 {
     "$schema": "node_modules/wrangler/config-schema.json",
     "name": "helpque",
+    "main": "@tanstack/react-start/server-entry",
+    "build": {
+        "command": "npx convex deploy --cmd 'npm run build'",
+    },
     "compatibility_date": "2025-09-24",
     "compatibility_flags": ["nodejs_compat"],
-    "main": "@tanstack/react-start/server-entry",
+    "observability": { "enabled": true },
+    "placement": { "mode": "smart" },
+    "preview_urls": true,
 }
