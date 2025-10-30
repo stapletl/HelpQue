@@ -13,6 +13,8 @@ import { Route as TeacherRouteImport } from './routes/teacher'
 import { Route as StudentRouteImport } from './routes/student'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as QueuesIdRouteImport } from './routes/queues.$id'
+import { Route as QueuesAdminIdRouteImport } from './routes/queues-admin.$id'
 
 const TeacherRoute = TeacherRouteImport.update({
   id: '/teacher',
@@ -34,18 +36,32 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QueuesIdRoute = QueuesIdRouteImport.update({
+  id: '/queues/$id',
+  path: '/queues/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QueuesAdminIdRoute = QueuesAdminIdRouteImport.update({
+  id: '/queues-admin/$id',
+  path: '/queues-admin/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/student': typeof StudentRoute
   '/teacher': typeof TeacherRoute
+  '/queues-admin/$id': typeof QueuesAdminIdRoute
+  '/queues/$id': typeof QueuesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/student': typeof StudentRoute
   '/teacher': typeof TeacherRoute
+  '/queues-admin/$id': typeof QueuesAdminIdRoute
+  '/queues/$id': typeof QueuesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +69,34 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/student': typeof StudentRoute
   '/teacher': typeof TeacherRoute
+  '/queues-admin/$id': typeof QueuesAdminIdRoute
+  '/queues/$id': typeof QueuesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/privacy' | '/student' | '/teacher'
+  fullPaths:
+    | '/'
+    | '/privacy'
+    | '/student'
+    | '/teacher'
+    | '/queues-admin/$id'
+    | '/queues/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/privacy' | '/student' | '/teacher'
-  id: '__root__' | '/' | '/privacy' | '/student' | '/teacher'
+  to:
+    | '/'
+    | '/privacy'
+    | '/student'
+    | '/teacher'
+    | '/queues-admin/$id'
+    | '/queues/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/privacy'
+    | '/student'
+    | '/teacher'
+    | '/queues-admin/$id'
+    | '/queues/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +104,8 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   StudentRoute: typeof StudentRoute
   TeacherRoute: typeof TeacherRoute
+  QueuesAdminIdRoute: typeof QueuesAdminIdRoute
+  QueuesIdRoute: typeof QueuesIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +138,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/queues/$id': {
+      id: '/queues/$id'
+      path: '/queues/$id'
+      fullPath: '/queues/$id'
+      preLoaderRoute: typeof QueuesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/queues-admin/$id': {
+      id: '/queues-admin/$id'
+      path: '/queues-admin/$id'
+      fullPath: '/queues-admin/$id'
+      preLoaderRoute: typeof QueuesAdminIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +160,8 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   StudentRoute: StudentRoute,
   TeacherRoute: TeacherRoute,
+  QueuesAdminIdRoute: QueuesAdminIdRoute,
+  QueuesIdRoute: QueuesIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
