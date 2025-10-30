@@ -9,6 +9,7 @@ import { ThemeProvider } from 'next-themes'
 import type { QueryClient } from '@tanstack/react-query'
 import appCss from '~/styles/app.css?url'
 import { AnimatedThemeToggler } from '~/components/ui/animated-theme-toggler'
+import { Toaster } from '~/components/ui/sonner'
 
 export const Route = createRootRouteWithContext<{
     queryClient: QueryClient
@@ -77,6 +78,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                     enableSystem={true}
                 >
                     {children}
+                    <Toaster />
                 </ThemeProvider>
                 <Scripts />
             </body>
