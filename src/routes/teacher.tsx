@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import { useState } from 'react'
@@ -43,14 +43,17 @@ function TeacherPage() {
 }
 
 function TeacherView() {
-    const [selectedQueueId, setSelectedQueueId] = useState<Id<'queues'> | null>(
-        null,
-    )
     const [showCreateQueue, setShowCreateQueue] = useState(false)
+    const router = useRouter()
 
     const { data: queues } = useSuspenseQuery(
         convexQuery(api.queues.listQueues, {}),
     )
+
+    const handleQueueCreated = (queueId: Id<'queues'>) => {
+        setShowCreateQueue(false)
+        router.navigate({ to: `/queues-admin/${queueId}` })
+    }
 
     return (
         <div className="min-h-screen bg-background">
@@ -81,59 +84,31 @@ function TeacherView() {
             <div className="container mx-auto px-4 py-8">
                 {/* Create Queue Form */}
                 {showCreateQueue && (
-                    <CreateQueueForm
-                        onSuccess={() => setShowCreateQueue(false)}
-                    />
+                    <CreateQueueForm onSuccess={handleQueueCreated} />
                 )}
 
-                <div className="grid lg:grid-cols-3 gap-6">
-                    {/* Queue List */}
-                    <div className="lg:col-span-1 space-y-4">
-                        <div className="flex items-center justify-between">
-                            <Text className="text-lg font-semibold">
-                                Queues ({queues.length})
-                            </Text>
-                        </div>
-
-                        <div className="space-y-3">
-                            {queues.length === 0 ? (
-                                <Card>
-                                    <CardContent className="py-8 text-center">
-                                        <Text variant="muted">
-                                            No queues yet. Create your first
-                                            queue to get started.
-                                        </Text>
-                                    </CardContent>
-                                </Card>
-                            ) : (
-                                queues.map((queue) => (
-                                    <QueueCard
-                                        key={queue._id}
-                                        queue={queue}
-                                        isSelected={
-                                            selectedQueueId === queue._id
-                                        }
-                                        onSelect={() =>
-                                            setSelectedQueueId(queue._id)
-                                        }
-                                    />
-                                ))
-                            )}
-                        </div>
+                {/* Queue List */}
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <Text className="text-lg font-semibold">
+                            Queues ({queues.length})
+                        </Text>
                     </div>
 
-                    {/* Queue Details */}
-                    <div className="lg:col-span-2">
-                        {selectedQueueId ? (
-                            <QueueDetails queueId={selectedQueueId} />
-                        ) : (
-                            <Card>
-                                <CardContent className="py-20 text-center">
-                                    <Text variant="muted" className="text-lg">
-                                        Select a queue to view details
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {queues.length === 0 ? (
+                            <Card className="md:col-span-2 lg:col-span-3">
+                                <CardContent className="py-8 text-center">
+                                    <Text variant="muted">
+                                        No queues yet. Create your first queue
+                                        to get started.
                                     </Text>
                                 </CardContent>
                             </Card>
+                        ) : (
+                            queues.map((queue) => (
+                                <QueueCard key={queue._id} queue={queue} />
+                            ))
                         )}
                     </div>
                 </div>
@@ -142,7 +117,11 @@ function TeacherView() {
     )
 }
 
-function CreateQueueForm({ onSuccess }: { onSuccess: () => void }) {
+function CreateQueueForm({
+    onSuccess,
+}: {
+    onSuccess: (queueId: Id<'queues'>) => void
+}) {
     const [name, setName] = useState('')
     const [description, setDescription] = useState('')
     const createQueue = useMutation(api.queues.createQueue)
@@ -151,14 +130,14 @@ function CreateQueueForm({ onSuccess }: { onSuccess: () => void }) {
         e.preventDefault()
         if (!name.trim()) return
 
-        await createQueue({
+        const queueId = await createQueue({
             name: name.trim(),
             description: description.trim() || undefined,
         })
 
         setName('')
         setDescription('')
-        onSuccess()
+        onSuccess(queueId)
     }
 
     return (
@@ -207,8 +186,6 @@ function CreateQueueForm({ onSuccess }: { onSuccess: () => void }) {
 
 function QueueCard({
     queue,
-    isSelected,
-    onSelect,
 }: {
     queue: {
         _id: Id<'queues'>
@@ -217,12 +194,12 @@ function QueueCard({
         isActive: boolean
         waitingCount: number
     }
-    isSelected: boolean
-    onSelect: () => void
 }) {
     const updateQueue = useMutation(api.queues.updateQueue)
+    const [copied, setCopied] = useState(false)
 
     const toggleActive = async (e: React.MouseEvent) => {
+        e.preventDefault()
         e.stopPropagation()
         await updateQueue({
             queueId: queue._id,
@@ -230,259 +207,107 @@ function QueueCard({
         })
     }
 
-    return (
-        <Card
-            className={`cursor-pointer transition-all ${
-                isSelected ? 'ring-2 ring-primary shadow-lg' : 'hover:shadow-md'
-            }`}
-            onClick={onSelect}
-        >
-            <CardContent className="py-4 space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                        <Text className="font-semibold truncate">
-                            {queue.name}
-                        </Text>
-                        {queue.description && (
-                            <Text
-                                variant="muted"
-                                className="text-xs truncate mt-0.5"
-                            >
-                                {queue.description}
-                            </Text>
-                        )}
-                    </div>
-                    <Badge
-                        variant={queue.isActive ? 'default' : 'outline'}
-                        className="shrink-0"
-                    >
-                        {queue.isActive ? 'Active' : 'Inactive'}
-                    </Badge>
-                </div>
+    const copyLink = async (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        const url = `${window.location.origin}/queues/${queue._id}`
+        await navigator.clipboard.writeText(url)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+    }
 
-                <div className="flex items-center justify-between">
+    return (
+        <Link
+            to="/queues-admin/$id"
+            params={{ id: queue._id }}
+            className="block"
+        >
+            <Card className="cursor-pointer transition-all hover:shadow-md h-full">
+                <CardContent className="py-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                            <Text className="font-semibold truncate">
+                                {queue.name}
+                            </Text>
+                            {queue.description && (
+                                <Text
+                                    variant="muted"
+                                    className="text-xs truncate mt-0.5"
+                                >
+                                    {queue.description}
+                                </Text>
+                            )}
+                        </div>
+                        <Badge
+                            variant={queue.isActive ? 'default' : 'outline'}
+                            className="shrink-0"
+                        >
+                            {queue.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
+                    </div>
+
                     <div className="flex items-center gap-2">
-                        <Badge variant="secondary">
+                        <Badge variant="secondary" className="shrink-0">
                             {queue.waitingCount}{' '}
                             {queue.waitingCount === 1 ? 'student' : 'students'}
                         </Badge>
                     </div>
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={toggleActive}
-                        className="h-7 px-2 text-xs"
-                    >
-                        {queue.isActive ? 'Deactivate' : 'Activate'}
-                    </Button>
-                </div>
-            </CardContent>
-        </Card>
-    )
-}
 
-function QueueDetails({ queueId }: { queueId: Id<'queues'> }) {
-    const { data: queue } = useSuspenseQuery(
-        convexQuery(api.queues.getQueue, { queueId }),
-    )
-
-    const { data: entries } = useSuspenseQuery(
-        convexQuery(api.queues.listQueueEntries, { queueId }),
-    )
-
-    const callNext = useMutation(api.queues.callNext)
-    const markAsHelped = useMutation(api.queues.markAsHelped)
-    const removeEntry = useMutation(api.queues.removeEntry)
-
-    if (!queue) {
-        return (
-            <Card>
-                <CardContent className="py-20 text-center">
-                    <Text variant="muted">Queue not found</Text>
-                </CardContent>
-            </Card>
-        )
-    }
-
-    const handleCallNext = async () => {
-        await callNext({ queueId })
-    }
-
-    const handleMarkHelped = async (entryId: Id<'queueEntries'>) => {
-        await markAsHelped({ entryId })
-    }
-
-    const handleRemoveEntry = async (entryId: Id<'queueEntries'>) => {
-        if (confirm('Are you sure you want to remove this student?')) {
-            await removeEntry({ entryId })
-        }
-    }
-
-    const formatWaitTime = (ms: number | null) => {
-        if (!ms) return 'N/A'
-        const minutes = Math.floor(ms / 60000)
-        if (minutes < 1) return '< 1 min'
-        return `${minutes} min`
-    }
-
-    const waitingEntries = entries.filter((e) => e.status === 'waiting')
-    const beingHelpedEntries = entries.filter(
-        (e) => e.status === 'being_helped',
-    )
-
-    return (
-        <div className="space-y-6">
-            {/* Queue Header */}
-            <Card>
-                <CardHeader>
-                    <div className="flex items-start justify-between">
-                        <div>
-                            <CardTitle className="text-2xl">
-                                {queue.name}
-                            </CardTitle>
-                            {queue.description && (
-                                <CardDescription className="mt-1">
-                                    {queue.description}
-                                </CardDescription>
-                            )}
-                        </div>
-                        <Badge variant={queue.isActive ? 'default' : 'outline'}>
-                            {queue.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    {/* Statistics */}
-                    <div className="grid grid-cols-3 gap-4">
-                        <div className="text-center p-3 bg-accent/50 rounded-lg">
-                            <div className="text-2xl font-bold">
-                                {queue.waitingCount}
-                            </div>
-                            <Text variant="muted" className="text-xs">
-                                Waiting
-                            </Text>
-                        </div>
-                        <div className="text-center p-3 bg-accent/50 rounded-lg">
-                            <div className="text-2xl font-bold">
-                                {queue.totalCount}
-                            </div>
-                            <Text variant="muted" className="text-xs">
-                                Total Served
-                            </Text>
-                        </div>
-                        <div className="text-center p-3 bg-accent/50 rounded-lg">
-                            <div className="text-2xl font-bold">
-                                {formatWaitTime(queue.averageWaitTime)}
-                            </div>
-                            <Text variant="muted" className="text-xs">
-                                Avg Wait
-                            </Text>
-                        </div>
-                    </div>
-
-                    {/* Call Next Button */}
-                    <Button
-                        onClick={handleCallNext}
-                        disabled={waitingEntries.length === 0}
-                        className="w-full mt-4"
-                        size="lg"
-                    >
-                        Call Next Student
-                    </Button>
-                </CardContent>
-            </Card>
-
-            {/* Currently Being Helped */}
-            {beingHelpedEntries.length > 0 && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-lg">
-                            Currently Being Helped
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                        {beingHelpedEntries.map((entry) => (
-                            <div
-                                key={entry._id}
-                                className="flex items-center justify-between p-3 bg-primary/10 rounded-lg"
-                            >
-                                <div>
-                                    <Text className="font-medium">
-                                        {entry.userName}
-                                    </Text>
-                                    {entry.notes && (
-                                        <Text
-                                            variant="muted"
-                                            className="text-sm"
-                                        >
-                                            {entry.notes}
-                                        </Text>
-                                    )}
-                                </div>
-                                <Button
-                                    onClick={() => handleMarkHelped(entry._id)}
-                                    size="sm"
-                                >
-                                    Mark as Helped
-                                </Button>
-                            </div>
-                        ))}
-                    </CardContent>
-                </Card>
-            )}
-
-            {/* Waiting Queue */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-lg">
-                        Waiting ({waitingEntries.length})
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {waitingEntries.length === 0 ? (
-                        <Text variant="muted" className="text-center py-8">
-                            No students waiting
-                        </Text>
-                    ) : (
-                        <div className="space-y-2">
-                            {waitingEntries.map((entry, index) => (
-                                <div
-                                    key={entry._id}
-                                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <Badge variant="outline">
-                                            #{index + 1}
-                                        </Badge>
-                                        <div>
-                                            <Text className="font-medium">
-                                                {entry.userName}
-                                            </Text>
-                                            {entry.notes && (
-                                                <Text
-                                                    variant="muted"
-                                                    className="text-sm"
-                                                >
-                                                    {entry.notes}
-                                                </Text>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <Button
-                                        onClick={() =>
-                                            handleRemoveEntry(entry._id)
-                                        }
-                                        size="sm"
-                                        variant="ghost"
+                    <div className="flex items-center gap-2">
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={copyLink}
+                            className="h-7 px-2 text-xs flex-1"
+                            title="Copy student link"
+                        >
+                            {copied ? (
+                                <span className="flex items-center gap-1">
+                                    <svg
+                                        className="w-3 h-3"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
                                     >
-                                        Remove
-                                    </Button>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M5 13l4 4L19 7"
+                                        />
+                                    </svg>
+                                    Copied
+                                </span>
+                            ) : (
+                                <span className="flex items-center gap-1">
+                                    <svg
+                                        className="w-3 h-3"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                    Copy Link
+                                </span>
+                            )}
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={toggleActive}
+                            className="h-7 px-2 text-xs"
+                        >
+                            {queue.isActive ? 'Deactivate' : 'Activate'}
+                        </Button>
+                    </div>
                 </CardContent>
             </Card>
-        </div>
+        </Link>
     )
 }
